@@ -6,7 +6,6 @@ import type { SlideDefinition } from "@/presentation";
 import { cn } from "@/presentation/utils";
 import { OMIT_BG, omitTheme } from "../theme";
 
-/** Put logo-omit.png and dashboard.png in public/presentation/images/ (logo-omit avoids clashing with the Rova logo.png). */
 const IMG = "/presentation/images/";
 const grid = { 2: "grid-cols-2", 3: "grid-cols-3", 4: "grid-cols-4", 5: "grid-cols-5" } as const;
 type N = keyof typeof grid;
@@ -47,15 +46,21 @@ function Foot({ children, delay = 1.8 }: { children: ReactNode; delay?: number }
 }
 
 /**
- * logo-omit.png is a transparent square: the wordmark fills about 82% of the width but only 29% of the height.
- * The negative margins trim the empty space above, below and (optionally) to the left, so `size` is roughly
- * the wordmark's width / 0.82 and the layout only reserves the space the wordmark really uses.
+ * logo-omit.png is a transparent 1254px square with the wordmark in the middle (x 115-1138, y 463-824).
+ * This crops the image to exactly the wordmark box, so no empty space is reserved and no negative margins are needed.
+ * `size` is how wide the whole square would be drawn; the visible wordmark is about 82% of that wide and 29% tall.
+ * A plain <img> is used on purpose: if the file is missing, the browser shows the alt text instead of a silent gap.
  */
-function Logo({ size, flushLeft }: { size: number; flushLeft?: boolean }) {
-  const trim = (r: number) => Math.round(size * r);
+function Logo({ size }: { size: number }) {
   return (
-    <div style={{ width: size, height: size, margin: `-${trim(0.36)}px 0 -${trim(0.34)}px ${flushLeft ? `-${trim(0.09)}px` : "0"}` }}>
-      <ImageFrame src={IMG + "logo-omit.png"} fit="contain" radius="none" className="h-full w-full" />
+    <div style={{ position: "relative", overflow: "hidden", width: size * 0.8158, height: size * 0.2879 }}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={IMG + "logo-omit.png"}
+        alt="Omit"
+        draggable={false}
+        style={{ position: "absolute", maxWidth: "none", width: size, height: size, left: -size * 0.0917, top: -size * 0.3692 }}
+      />
     </div>
   );
 }
@@ -73,7 +78,7 @@ export function Opening({ notes }: { notes: string }) {
   return (
     <Slide transition="fade" background={OMIT_BG} notes={notes}>
       <div style={omitTheme} className="flex h-full min-h-0 flex-col items-center justify-center gap-10 text-center">
-        <FadeIn className="shrink-0"><Logo size={900} /></FadeIn>
+        <FadeIn className="shrink-0"><Logo size={1000} /></FadeIn>
         <FadeIn delay={0.6} className="shrink-0">
           <div className="font-display text-[68px] font-medium leading-[1.1] tracking-[-0.02em]">
             {"Share what they need."}<br />{"Omit what they don't."}
@@ -229,7 +234,7 @@ export function Vision({ notes, lines, chips, final }: { notes: string; lines: [
   return (
     <Slide transition="fade" background={OMIT_BG} notes={notes}>
       <div style={omitTheme} className="flex h-full min-h-0 flex-col justify-between">
-        <FadeIn className="shrink-0"><Logo size={420} flushLeft /></FadeIn>
+        <FadeIn className="shrink-0"><Logo size={500} /></FadeIn>
         <FadeIn delay={0.4} className="shrink-0">
           <div className="text-[52px] leading-[1.15] text-p-muted">{lines[0]}</div>
           <div className="mt-2 font-display text-[60px] font-medium leading-[1.1] text-p-fg">{lines[1]}</div>
